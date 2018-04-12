@@ -20,8 +20,8 @@ namespace OmniSharp.MSBuild
 
         public ProjectLoader(MSBuildOptions options, string solutionDirectory, ImmutableDictionary<string, string> propertyOverrides, ILoggerFactory loggerFactory, SdksPathResolver sdksPathResolver)
         {
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             _logger = loggerFactory.CreateLogger<ProjectLoader>();
-            _options = options ?? new MSBuildOptions();
             _sdksPathResolver = sdksPathResolver ?? throw new ArgumentNullException(nameof(sdksPathResolver));
             _globalProperties = CreateGlobalProperties(solutionDirectory, propertyOverrides);
         }
