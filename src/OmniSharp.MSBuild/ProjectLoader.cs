@@ -15,74 +15,16 @@ namespace OmniSharp.MSBuild
     internal class ProjectLoader
     {
         private readonly ILogger _logger;
-        private readonly Dictionary<string, string> _globalProperties;
+        private readonly IDictionary<string, string> _globalProperties;
         private readonly MSBuildOptions _options;
         private readonly SdksPathResolver _sdksPathResolver;
 
-        public ProjectLoader(MSBuildOptions options, string solutionDirectory, ImmutableDictionary<string, string> propertyOverrides, ILoggerFactory loggerFactory, SdksPathResolver sdksPathResolver)
+        public ProjectLoader(IDictionary<string, string> globalProperties, MSBuildOptions options, ILoggerFactory loggerFactory, SdksPathResolver sdksPathResolver)
         {
+            _globalProperties = globalProperties ?? throw new ArgumentNullException(nameof(globalProperties));
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _logger = loggerFactory.CreateLogger<ProjectLoader>();
             _sdksPathResolver = sdksPathResolver ?? throw new ArgumentNullException(nameof(sdksPathResolver));
-            _globalProperties = CreateGlobalProperties(solutionDirectory, propertyOverrides);
-        }
-
-        private Dictionary<string, string> CreateGlobalProperties(string solutionDirectory, ImmutableDictionary<string, string> propertyOverrides)
-        {
-            var result = new Dictionary<string, string>
-            {
-                { PropertyNames.DesignTimeBuild, bool.TrueString },
-                { PropertyNames.BuildingInsideVisualStudio, bool.TrueString },
-                { PropertyNames.BuildProjectReferences, bool.FalseString },
-                { PropertyNames.BuildingProject, bool.FalseString },
-                { PropertyNames.SolutionDir, solutionDirectory + Path.DirectorySeparatorChar },
-
-                // Setting this property will cause any XAML markup compiler tasks to run in the
-                // current AppDomain, rather than creating a new one. This is important because
-                // our AppDomain.AssemblyResolve handler for MSBuild will not be connected to
-                // the XAML markup compiler's AppDomain, causing the task not to be able to find
-                // MSBuild.
-                { PropertyNames.AlwaysCompileMarkupFilesInSeparateDomain, bool.FalseString },
-
-                // This properties allow the design-time build to handle the Compile target without actually invoking the compiler.
-                // See https://github.com/dotnet/roslyn/pull/4604 for details.
-                { PropertyNames.ProvideCommandLineArgs, bool.TrueString },
-                { PropertyNames.SkipCompilerExecution, bool.TrueString }
-            };
-
-            AddPropertyOverride(PropertyNames.MSBuildExtensionsPath, _options.MSBuildExtensionsPath);
-            AddPropertyOverride(PropertyNames.TargetFrameworkRootPath, _options.TargetFrameworkRootPath);
-            AddPropertyOverride(PropertyNames.RoslynTargetsPath, _options.RoslynTargetsPath);
-            AddPropertyOverride(PropertyNames.CscToolPath, _options.CscToolPath);
-            AddPropertyOverride(PropertyNames.CscToolExe, _options.CscToolExe);
-            AddPropertyOverride(PropertyNames.VisualStudioVersion, _options.VisualStudioVersion);
-            AddPropertyOverride(PropertyNames.Configuration, _options.Configuration);
-            AddPropertyOverride(PropertyNames.Platform, _options.Platform);
-
-            if (propertyOverrides.TryGetValue(PropertyNames.BypassFrameworkInstallChecks, out var value))
-            {
-                result.Add(PropertyNames.BypassFrameworkInstallChecks, value);
-            }
-
-            return result;
-
-            void AddPropertyOverride(string propertyName, string userOverrideValue)
-            {
-                var overrideValue = propertyOverrides.GetValueOrDefault(propertyName);
-
-                if (!string.IsNullOrEmpty(userOverrideValue))
-                {
-                    // If the user set the option, we should use that.
-                    result.Add(propertyName, userOverrideValue);
-                    _logger.LogDebug($"'{propertyName}' set to '{userOverrideValue}' (user override)");
-                }
-                else if (!string.IsNullOrEmpty(overrideValue))
-                {
-                    // If we have a custom environment value, we should use that.
-                    result.Add(propertyName, overrideValue);
-                    _logger.LogDebug($"'{propertyName}' set to '{overrideValue}'");
-                }
-            }
         }
 
         public (MSB.Execution.ProjectInstance projectInstance, ImmutableArray<MSBuildDiagnostic> diagnostics) BuildProject(string filePath)

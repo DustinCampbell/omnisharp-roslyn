@@ -24,11 +24,15 @@ namespace OmniSharp.MSBuild.Tests
         {
             var msbuildLocator = host.GetExport<IMSBuildLocator>();
             var sdksPathResolver = host.GetExport<SdksPathResolver>();
+            var options = new MSBuildOptions();
+
+            var builder = new GlobalPropertiesBuilder(LoggerFactory);
+            builder.AddSolutionDirProperty(testProject.Directory);
+            builder.AddPropertyOverrides(options, msbuildLocator);
 
             var loader = new ProjectLoader(
-                options: new MSBuildOptions(),
-                solutionDirectory: testProject.Directory,
-                propertyOverrides: msbuildLocator.RegisteredInstance.PropertyOverrides,
+                globalProperties: builder.ToGlobalProperties(),
+                options: options,
                 loggerFactory: LoggerFactory,
                 sdksPathResolver: sdksPathResolver);
 

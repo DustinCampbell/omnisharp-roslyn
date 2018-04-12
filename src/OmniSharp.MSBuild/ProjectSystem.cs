@@ -24,7 +24,7 @@ namespace OmniSharp.MSBuild
     {
         private readonly IOmniSharpEnvironment _environment;
         private readonly OmniSharpWorkspace _workspace;
-        private readonly ImmutableDictionary<string, string> _propertyOverrides;
+        private readonly IMSBuildLocator _msbuildLocator;
         private readonly DotNetCliService _dotNetCli;
         private readonly SdksPathResolver _sdksPathResolver;
         private readonly MetadataFileReferenceCache _metadataFileReferenceCache;
@@ -39,7 +39,6 @@ namespace OmniSharp.MSBuild
         private PackageDependencyChecker _packageDependencyChecker;
         private ProjectManager _manager;
         private ProjectLoader _loader;
-        private MSBuildOptions _options;
         private string _solutionFileOrRootPath;
 
         public string Key { get; } = "MsBuild";
@@ -60,7 +59,7 @@ namespace OmniSharp.MSBuild
         {
             _environment = environment;
             _workspace = workspace;
-            _propertyOverrides = msbuildLocator.RegisteredInstance.PropertyOverrides;
+            _msbuildLocator = msbuildLocator;
             _dotNetCli = dotNetCliService;
             _sdksPathResolver = sdksPathResolver;
             _metadataFileReferenceCache = metadataFileReferenceCache;
@@ -74,8 +73,8 @@ namespace OmniSharp.MSBuild
 
         public void Initalize(IConfiguration configuration)
         {
-            _options = new MSBuildOptions();
-            ConfigurationBinder.Bind(configuration, _options);
+            var options = new MSBuildOptions();
+            ConfigurationBinder.Bind(configuration, options);
 
             if (_environment.LogLevel < LogLevel.Information)
             {
@@ -83,8 +82,15 @@ namespace OmniSharp.MSBuild
                 _logger.LogDebug($"MSBuild environment: {Environment.NewLine}{buildEnvironmentInfo}");
             }
 
-            _packageDependencyChecker = new PackageDependencyChecker(_loggerFactory, _eventEmitter, _dotNetCli, _options);
-            _loader = new ProjectLoader(_options, _environment.TargetDirectory, _propertyOverrides, _loggerFactory, _sdksPathResolver);
+            _packageDependencyChecker = new PackageDependencyChecker(_loggerFactory, _eventEmitter, _dotNetCli, options);
+
+            var globalPropertiesBuilder = new GlobalPropertiesBuilder(_loggerFactory);
+            globalPropertiesBuilder.AddSolutionDirProperty(_environment.TargetDirectory);
+            globalPropertiesBuilder.AddPropertyOverrides(options, _msbuildLocator);
+
+            var globalProperties = globalPropertiesBuilder.ToGlobalProperties();
+
+            _loader = new ProjectLoader(globalProperties, options, _loggerFactory, _sdksPathResolver);
             _manager = new ProjectManager(_loggerFactory, _eventEmitter, _fileSystemWatcher, _metadataFileReferenceCache, _packageDependencyChecker, _loader, _workspace);
 
             var initialProjectPaths = GetInitialProjectPaths();
