@@ -11,6 +11,7 @@
         public const string BuildingProject = nameof(BuildingProject);
         public const string BypassFrameworkInstallChecks = nameof(BypassFrameworkInstallChecks);
         public const string Configuration = nameof(Configuration);
+        public const string ContinueOnError = nameof(ContinueOnError);
         public const string CscToolExe = nameof(CscToolExe);
         public const string CscToolPath = nameof(CscToolPath);
         public const string DefineConstants = nameof(DefineConstants);

@@ -299,7 +299,9 @@ namespace OmniSharp.MSBuild
                 return;
             }
 
-            var project = _workspace.CurrentSolution.GetProject(projectFileInfo.Id);
+            var solution = _workspace.CurrentSolution;
+
+            var project = solution.GetProject(projectFileInfo.Id);
             if (project == null)
             {
                 _logger.LogError($"Could not locate project in workspace: {projectFileInfo.FilePath}");
@@ -312,7 +314,7 @@ namespace OmniSharp.MSBuild
             UpdateReferences(project, projectFileInfo.References);
         }
 
-        private void UpdateSourceFiles(Project project, IList<string> sourceFiles)
+        private void UpdateSourceFiles(Project project, ImmutableArray<string> sourceFiles)
         {
             var currentDocuments = project.Documents.ToDictionary(d => d.FilePath, d => d.Id);
 
