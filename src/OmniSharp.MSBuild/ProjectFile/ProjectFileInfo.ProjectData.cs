@@ -6,6 +6,7 @@ using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NuGet.Packaging.Core;
+using OmniSharp.MSBuild.Constants;
 using OmniSharp.Utilities;
 
 using MSB = Microsoft.Build;

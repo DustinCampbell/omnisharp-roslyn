@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using OmniSharp.MSBuild.ProjectFile;
+using OmniSharp.MSBuild.Constants;
 using MSB = Microsoft.Build;
 
 namespace OmniSharp.MSBuild.Build

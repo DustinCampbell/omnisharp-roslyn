@@ -1,4 +1,4 @@
-﻿namespace OmniSharp.MSBuild.ProjectFile
+﻿namespace OmniSharp.MSBuild.Constants
 {
     internal static class PropertyNames
     {

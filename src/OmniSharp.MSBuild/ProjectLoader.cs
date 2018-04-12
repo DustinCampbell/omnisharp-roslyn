@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using OmniSharp.MSBuild.Constants;
 using OmniSharp.MSBuild.Logging;
 using OmniSharp.MSBuild.ProjectFile;
 using OmniSharp.Options;
