@@ -23,18 +23,17 @@ namespace OmniSharp.MSBuild
             _logger = loggerFactory.CreateLogger<ProjectLoader>();
             _options = options ?? new MSBuildOptions();
             _sdksPathResolver = sdksPathResolver ?? throw new ArgumentNullException(nameof(sdksPathResolver));
-            _globalProperties = CreateGlobalProperties(_options, solutionDirectory, propertyOverrides, _logger);
+            _globalProperties = CreateGlobalProperties(solutionDirectory, propertyOverrides);
         }
 
-        private static Dictionary<string, string> CreateGlobalProperties(
-            MSBuildOptions options, string solutionDirectory, ImmutableDictionary<string, string> propertyOverrides, ILogger logger)
+        private Dictionary<string, string> CreateGlobalProperties(string solutionDirectory, ImmutableDictionary<string, string> propertyOverrides)
         {
-            var globalProperties = new Dictionary<string, string>
+            var result = new Dictionary<string, string>
             {
-                { PropertyNames.DesignTimeBuild, "true" },
-                { PropertyNames.BuildingInsideVisualStudio, "true" },
-                { PropertyNames.BuildProjectReferences, "false" },
-                { PropertyNames._ResolveReferenceDependencies, "true" },
+                { PropertyNames.DesignTimeBuild, bool.TrueString },
+                { PropertyNames.BuildingInsideVisualStudio, bool.TrueString },
+                { PropertyNames.BuildProjectReferences, bool.FalseString },
+                { PropertyNames.BuildingProject, bool.FalseString },
                 { PropertyNames.SolutionDir, solutionDirectory + Path.DirectorySeparatorChar },
 
                 // Setting this property will cause any XAML markup compiler tasks to run in the
@@ -42,29 +41,47 @@ namespace OmniSharp.MSBuild
                 // our AppDomain.AssemblyResolve handler for MSBuild will not be connected to
                 // the XAML markup compiler's AppDomain, causing the task not to be able to find
                 // MSBuild.
-                { PropertyNames.AlwaysCompileMarkupFilesInSeparateDomain, "false" },
+                { PropertyNames.AlwaysCompileMarkupFilesInSeparateDomain, bool.FalseString },
 
                 // This properties allow the design-time build to handle the Compile target without actually invoking the compiler.
                 // See https://github.com/dotnet/roslyn/pull/4604 for details.
-                { PropertyNames.ProvideCommandLineArgs, "true" },
-                { PropertyNames.SkipCompilerExecution, "true" }
+                { PropertyNames.ProvideCommandLineArgs, bool.TrueString },
+                { PropertyNames.SkipCompilerExecution, bool.TrueString }
             };
 
-            globalProperties.AddPropertyOverride(PropertyNames.MSBuildExtensionsPath, options.MSBuildExtensionsPath, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.TargetFrameworkRootPath, options.TargetFrameworkRootPath, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.RoslynTargetsPath, options.RoslynTargetsPath, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.CscToolPath, options.CscToolPath, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.CscToolExe, options.CscToolExe, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.VisualStudioVersion, options.VisualStudioVersion, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.Configuration, options.Configuration, propertyOverrides, logger);
-            globalProperties.AddPropertyOverride(PropertyNames.Platform, options.Platform, propertyOverrides, logger);
+            AddPropertyOverride(PropertyNames.MSBuildExtensionsPath, _options.MSBuildExtensionsPath);
+            AddPropertyOverride(PropertyNames.TargetFrameworkRootPath, _options.TargetFrameworkRootPath);
+            AddPropertyOverride(PropertyNames.RoslynTargetsPath, _options.RoslynTargetsPath);
+            AddPropertyOverride(PropertyNames.CscToolPath, _options.CscToolPath);
+            AddPropertyOverride(PropertyNames.CscToolExe, _options.CscToolExe);
+            AddPropertyOverride(PropertyNames.VisualStudioVersion, _options.VisualStudioVersion);
+            AddPropertyOverride(PropertyNames.Configuration, _options.Configuration);
+            AddPropertyOverride(PropertyNames.Platform, _options.Platform);
 
             if (propertyOverrides.TryGetValue(PropertyNames.BypassFrameworkInstallChecks, out var value))
             {
-                globalProperties.Add(PropertyNames.BypassFrameworkInstallChecks, value);
+                result.Add(PropertyNames.BypassFrameworkInstallChecks, value);
             }
 
-            return globalProperties;
+            return result;
+
+            void AddPropertyOverride(string propertyName, string userOverrideValue)
+            {
+                var overrideValue = propertyOverrides.GetValueOrDefault(propertyName);
+
+                if (!string.IsNullOrEmpty(userOverrideValue))
+                {
+                    // If the user set the option, we should use that.
+                    result.Add(propertyName, userOverrideValue);
+                    _logger.LogDebug($"'{propertyName}' set to '{userOverrideValue}' (user override)");
+                }
+                else if (!string.IsNullOrEmpty(overrideValue))
+                {
+                    // If we have a custom environment value, we should use that.
+                    result.Add(propertyName, overrideValue);
+                    _logger.LogDebug($"'{propertyName}' set to '{overrideValue}'");
+                }
+            }
         }
 
         public (MSB.Execution.ProjectInstance projectInstance, ImmutableArray<MSBuildDiagnostic> diagnostics) BuildProject(string filePath)
