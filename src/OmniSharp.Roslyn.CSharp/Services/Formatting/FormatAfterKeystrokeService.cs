@@ -1,7 +1,6 @@
 using System.Composition;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Mef;
 using OmniSharp.Models.Format;
 using OmniSharp.Roslyn.CSharp.Workers.Formatting;
@@ -28,7 +27,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.Formatting
             }
 
             var text = await document.GetTextAsync();
-            int position = text.Lines.GetPosition(new LinePosition(request.Line, request.Column));
+            var position = text.GetPosition(request);
             var changes = await FormattingWorker.GetFormattingChangesAfterKeystroke(document, position, request.Char);
 
             return new FormatRangeResponse()

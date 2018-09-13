@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Recommendations;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Extensions;
 using OmniSharp.Mef;
 using OmniSharp.Models.AutoComplete;
@@ -37,7 +36,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.Intellisense
             foreach (var document in documents)
             {
                 var sourceText = await document.GetTextAsync();
-                var position = sourceText.Lines.GetPosition(new LinePosition(request.Line, request.Column));
+                var position = sourceText.GetPosition(request);
                 var service = CompletionService.GetService(document);
                 var completionList = await service.GetCompletionsAsync(document, position);
 

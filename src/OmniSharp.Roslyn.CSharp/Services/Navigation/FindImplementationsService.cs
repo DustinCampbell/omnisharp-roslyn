@@ -1,11 +1,9 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Helpers;
 using OmniSharp.Mef;
 using OmniSharp.Models;
@@ -33,7 +31,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.Navigation
             {
                 var semanticModel = await document.GetSemanticModelAsync();
                 var sourceText = await document.GetTextAsync();
-                var position = sourceText.Lines.GetPosition(new LinePosition(request.Line, request.Column));
+                var position = sourceText.GetPosition(request);
                 var symbol = await SymbolFinder.FindSymbolAtPositionAsync(semanticModel, position, _workspace);
                 var quickFixes = new List<QuickFix>();
 

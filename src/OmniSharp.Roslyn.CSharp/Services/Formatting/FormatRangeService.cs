@@ -1,7 +1,6 @@
 using System.Composition;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Mef;
 using OmniSharp.Models.Format;
 using OmniSharp.Roslyn.CSharp.Workers.Formatting;
@@ -28,8 +27,8 @@ namespace OmniSharp.Roslyn.CSharp.Services.Formatting
             }
 
             var text = await document.GetTextAsync();
-            var start = text.Lines.GetPosition(new LinePosition(request.Line, request.Column));
-            var end = text.Lines.GetPosition(new LinePosition(request.EndLine, request.EndColumn));
+            var start = text.GetPosition(request);
+            var end = text.GetPosition(request.EndLine, request.EndColumn);
             var syntaxTree = await document.GetSyntaxRootAsync();
             var tokenStart = syntaxTree.FindToken(start).FullSpan.Start;
             var changes = await FormattingWorker.GetFormattingChanges(document, tokenStart, end);

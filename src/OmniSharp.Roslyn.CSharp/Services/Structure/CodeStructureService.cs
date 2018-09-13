@@ -334,17 +334,17 @@ namespace OmniSharp.Roslyn.CSharp.Services.Structure
         {
             if (attributesSpan != default)
             {
-                builder.AddRange(SymbolRangeNames.Attributes, text.GetRangeFromSpan(attributesSpan));
+                builder.AddRange(SymbolRangeNames.Attributes, text.GetOmniSharpRange(attributesSpan));
             }
 
             if (fullSpan != default)
             {
-                builder.AddRange(SymbolRangeNames.Full, text.GetRangeFromSpan(fullSpan));
+                builder.AddRange(SymbolRangeNames.Full, text.GetOmniSharpRange(fullSpan));
             }
 
             if (nameSpan != default)
             {
-                builder.AddRange(SymbolRangeNames.Name, text.GetRangeFromSpan(nameSpan));
+                builder.AddRange(SymbolRangeNames.Name, text.GetOmniSharpRange(nameSpan));
             }
         }
 

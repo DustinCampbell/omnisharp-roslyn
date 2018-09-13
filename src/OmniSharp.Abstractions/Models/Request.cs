@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace OmniSharp.Models
 {
-    public class Request : SimpleFileRequest
+    public class Request : SimpleFileRequest, IPointLike
     {
         [JsonConverter(typeof(ZeroBasedIndexConverter))]
         public int Line { get; set; }

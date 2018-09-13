@@ -83,7 +83,7 @@ namespace OmniSharp.Cake.Utilities
             }
 
             var point = new Point { Column = 0, Line = index };
-            var textSpan = sourceText.GetSpanFromRange(new Range
+            var textSpan = sourceText.GetSpan(new Range
             {
                 Start = point,
                 End = point

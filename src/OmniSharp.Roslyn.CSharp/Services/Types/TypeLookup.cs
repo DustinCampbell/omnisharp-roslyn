@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Mef;
 using OmniSharp.Models.TypeLookup;
 using OmniSharp.Options;
@@ -35,7 +34,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.Types
             {
                 var semanticModel = await document.GetSemanticModelAsync();
                 var sourceText = await document.GetTextAsync();
-                var position = sourceText.Lines.GetPosition(new LinePosition(request.Line, request.Column));
+                var position = sourceText.GetPosition(request);
                 var symbol = await SymbolFinder.FindSymbolAtPositionAsync(semanticModel, position, _workspace);
                 if (symbol != null)
                 {

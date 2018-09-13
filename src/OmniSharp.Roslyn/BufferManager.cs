@@ -67,8 +67,8 @@ namespace OmniSharp.Roslyn
 
                         foreach (var change in request.Changes)
                         {
-                            var startOffset = sourceText.Lines.GetPosition(new LinePosition(change.StartLine, change.StartColumn));
-                            var endOffset = sourceText.Lines.GetPosition(new LinePosition(change.EndLine, change.EndColumn));
+                            var startOffset = sourceText.GetPosition(change.StartLine, change.StartColumn);
+                            var endOffset = sourceText.GetPosition(change.EndLine, change.EndColumn);
 
                             sourceText = sourceText.WithChanges(new[] {
                                 new TextChange(new TextSpan(startOffset, endOffset - startOffset), change.NewText)
@@ -104,8 +104,8 @@ namespace OmniSharp.Roslyn
                     var document = solution.GetDocument(documentId);
                     var sourceText = await document.GetTextAsync();
 
-                    var startOffset = sourceText.Lines.GetPosition(new LinePosition(request.StartLine, request.StartColumn));
-                    var endOffset = sourceText.Lines.GetPosition(new LinePosition(request.EndLine, request.EndColumn));
+                    var startOffset = sourceText.GetPosition(request.StartLine, request.StartColumn);
+                    var endOffset = sourceText.GetPosition(request.EndLine, request.EndColumn);
 
                     sourceText = sourceText.WithChanges(new[] {
                         new TextChange(new TextSpan(startOffset, endOffset - startOffset), request.NewText)

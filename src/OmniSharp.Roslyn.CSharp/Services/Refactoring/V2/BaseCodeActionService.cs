@@ -89,10 +89,10 @@ namespace OmniSharp.Roslyn.CSharp.Services.Refactoring.V2
         {
             if (request.Selection != null)
             {
-                return sourceText.GetSpanFromRange(request.Selection);
+                return sourceText.GetSpan(request.Selection);
             }
 
-            var position = sourceText.GetPositionFromLineAndOffset(request.Line, request.Column);
+            var position = sourceText.GetPosition(request.Line, request.Column);
             return new TextSpan(position, length: 0);
         }
 

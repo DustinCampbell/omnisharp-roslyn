@@ -67,7 +67,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.Structure
                     var textSpan = _getTextSpan.Invoke<TextSpan>(span, Array.Empty<object>());
 
                     outliningSpans.Add(new CodeFoldingBlock(
-                        text.GetRangeFromSpan(textSpan),
+                        text.GetOmniSharpRange(textSpan),
                         type: ConvertToWellKnownBlockType(_getType.Invoke<string>(span, Array.Empty<object>()))));
                 }
             }

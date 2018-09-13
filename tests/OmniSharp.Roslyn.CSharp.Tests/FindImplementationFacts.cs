@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Models;
 using OmniSharp.Models.FindImplementations;
 using OmniSharp.Roslyn.CSharp.Services.Navigation;
@@ -158,7 +157,7 @@ namespace OmniSharp.Roslyn.CSharp.Tests
             {
                 var document = workspace.GetDocument(quickfix.FileName);
                 var sourceText = await document.GetTextAsync();
-                var position = sourceText.Lines.GetPosition(new LinePosition(quickfix.Line, quickfix.Column));
+                var position = sourceText.GetPosition(quickfix.Line, quickfix.Column);
                 var semanticModel = await document.GetSemanticModelAsync();
                 var symbol = await SymbolFinder.FindSymbolAtPositionAsync(semanticModel, position, workspace);
 

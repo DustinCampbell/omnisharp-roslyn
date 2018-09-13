@@ -5,8 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using Microsoft.CodeAnalysis.Text;
-using OmniSharp.Cake.Extensions;
 using OmniSharp.Mef;
 using OmniSharp.Models.GotoDefinition;
 using OmniSharp.Models.Metadata;
@@ -90,7 +88,7 @@ namespace OmniSharp.Cake.Services.RequestHandlers.Navigation
                     return response;
                 }
             }
-            var position = sourceText.Lines.GetPosition(new LinePosition(lineIndex, column));
+            var position = sourceText.GetPosition(lineIndex, column);
             var symbol = await SymbolFinder.FindSymbolAtPositionAsync(semanticModel, position, Workspace);
 
             if (symbol == null || symbol is INamespaceSymbol)

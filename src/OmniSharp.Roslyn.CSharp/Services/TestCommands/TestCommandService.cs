@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using OmniSharp.Mef;
 using OmniSharp.Models;
 using OmniSharp.Models.TestCommand;
@@ -38,7 +37,7 @@ namespace OmniSharp.Roslyn.CSharp.Services.TestCommands
                 var semanticModel = await document.GetSemanticModelAsync();
                 var syntaxTree = semanticModel.SyntaxTree;
                 var sourceText = await document.GetTextAsync();
-                var position = sourceText.Lines.GetPosition(new LinePosition(request.Line, request.Column));
+                var position = sourceText.GetPosition(request);
                 var node = syntaxTree.GetRoot().FindToken(position).Parent;
 
                 SyntaxNode method = node.FirstAncestorOrSelf<MethodDeclarationSyntax>();
