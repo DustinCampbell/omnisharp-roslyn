@@ -58,6 +58,7 @@ namespace OmniSharp
 
             public const string BlockStructure = "/v2/blockstructure";
             public const string CodeStructure = "/v2/codestructure";
+            public const string QuickInfo = "/v2/quickinfo";
         }
     }
 }
